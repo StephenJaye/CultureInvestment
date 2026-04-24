@@ -953,9 +953,26 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
     errEl.style.display = 'block';
     errEl.textContent = `⚠ Error analyzing ${raw}: ${err.message}`;
   } finally {
-    document.getElementById('search-btn').disabled = false;
     document.getElementById('loading').style.display = 'none';
+    startCooldown();
   }
+}
+
+function startCooldown() {
+  const btn = document.getElementById('search-btn');
+  let secs = 30;
+  btn.disabled = true;
+  btn.textContent = `Wait ${secs}s`;
+  const interval = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(interval);
+      btn.disabled = false;
+      btn.textContent = 'Analyze →';
+    } else {
+      btn.textContent = `Wait ${secs}s`;
+    }
+  }, 1000);
 }
 
 // ── Render results ─────────────────────────────────────────────
