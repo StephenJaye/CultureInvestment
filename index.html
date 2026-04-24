@@ -692,29 +692,28 @@ const CACHE_PREFIX = 'ps_ticker:';
 
 async function cacheGet(ticker) {
   try {
-    const r = await window.storage.get(CACHE_PREFIX + ticker);
-    return r ? JSON.parse(r.value) : null;
+    const r = localStorage.getItem(CACHE_PREFIX + ticker);
+    return r ? JSON.parse(r) : null;
   } catch(e) { return null; }
 }
 
 async function cacheSet(ticker, data) {
   try {
     const entry = { data, cachedAt: Date.now() };
-    await window.storage.set(CACHE_PREFIX + ticker, JSON.stringify(entry));
+    localStorage.setItem(CACHE_PREFIX + ticker, JSON.stringify(entry));
   } catch(e) { console.warn('Cache write failed', e); }
 }
 
 async function cacheList() {
   try {
-    const r = await window.storage.list(CACHE_PREFIX);
-    return r ? r.keys : [];
+    return Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX));
   } catch(e) { return []; }
 }
 
 async function cacheClear() {
   try {
     const keys = await cacheList();
-    for (const k of keys) await window.storage.delete(k);
+    for (const k of keys) localStorage.removeItem(k);
   } catch(e) {}
 }
 
@@ -743,9 +742,9 @@ async function renderScoreboard() {
   const entries = [];
   for (const k of keys) {
     try {
-      const r = await window.storage.get(k);
+      const r = localStorage.getItem(k);
       if (r) {
-        const entry = JSON.parse(r.value);
+        const entry = JSON.parse(r);
         const ticker = k.replace(CACHE_PREFIX, '');
         entries.push({ ticker, score: entry.data.overall_score, cachedAt: entry.cachedAt });
       }
