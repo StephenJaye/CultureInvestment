@@ -751,9 +751,10 @@ async function renderScoreboard() {
     } catch(e) {}
   }
 
-  entries.sort((a,b) => b.score - a.score);
+  entries.sort((a,b) => b.cachedAt - a.cachedAt);
+  const displayed = entries.slice(0, 40);
 
-  const chipsHtml = entries.map(e => {
+  const chipsHtml = displayed.map(e => {
     const color = scoreColor(e.score);
     return `<div class="sb-chip" onclick="loadFromCache('${e.ticker}')" title="Analyzed ${formatDate(e.cachedAt)}">
       <span class="sb-ticker">${e.ticker}</span>
@@ -764,7 +765,7 @@ async function renderScoreboard() {
 
   sb.innerHTML = `
     <div class="scoreboard-header">
-      <span class="scoreboard-title">📋 Your Scorecard (${entries.length} ticker${entries.length===1?'':'s'})</span>
+      <span class="scoreboard-title">📋 Your Scorecard (${displayed.length}${entries.length > 40 ? ' of ' + entries.length : ''} ticker${displayed.length===1?'':'s'})</span>
       <button class="clear-cache-btn" onclick="clearAll()">Clear all</button>
     </div>
     <div class="scoreboard-grid">${chipsHtml}</div>
