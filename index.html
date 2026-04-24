@@ -960,7 +960,7 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
 
 function startCooldown() {
   const btn = document.getElementById('search-btn');
-  let secs = 30;
+  let secs = 65;
   btn.disabled = true;
   btn.textContent = `Wait ${secs}s`;
   const interval = setInterval(() => {
