@@ -894,6 +894,7 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        ticker: raw,
         model: "claude-sonnet-4-5",
         max_tokens: 2000,
         system: systemPrompt,
@@ -918,34 +919,10 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
       throw new Error(e.message || JSON.stringify(e));
     }
 
-    const textBlocks = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
-    const clean = textBlocks.replace(/```json|```/g, '').trim();
+    // Save to local cache and render
+    await cacheSet(raw, data);
 
-    let parsed;
-    function repairAndParse(str) {
-      try { return JSON.parse(str); } catch(e) {}
-      const m = str.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('No JSON object found in response');
-      let s = m[0];
-      s = s.replace(/,\s*([\}\]])/g, '$1');
-      try { return JSON.parse(s); } catch(e) {}
-      s = s.replace(/,?\s*"[^"\\]*"\s*:\s*[^,\}\]]*$/, '');
-      s = s.replace(/,\s*([\}\]])/g, '$1');
-      const openArr = (s.match(/\[/g)||[]).length - (s.match(/\]/g)||[]).length;
-      const openObj = (s.match(/\{/g)||[]).length - (s.match(/\}/g)||[]).length;
-      for (let i=0;i<openArr;i++) s += ']';
-      for (let i=0;i<openObj;i++) s += '}';
-      return JSON.parse(s);
-    }
-    try { parsed = repairAndParse(clean); }
-    catch(e) {
-      throw new Error('Response was malformed — please try again (this is intermittent).');
-    }
-
-    // Save to cache
-    await cacheSet(raw, parsed);
-
-    renderResults(parsed, Date.now(), true);
+    renderResults(data, Date.now(), true);
     await renderScoreboard();
 
   } catch(err) {
