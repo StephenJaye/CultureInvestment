@@ -909,11 +909,11 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
       if (e.type === 'exceeded_limit' || JSON.stringify(e).includes('exceeded_limit')) {
         const w5h = e.windows && e.windows['5h'];
         const resets = e.resetsAt || (w5h && w5h.resets_at);
-        let msg = 'Rate limit reached — you have analyzed many tickers recently. ';
+        let msg = 'Too many searches in a short period. Please wait about a minute and try again.';
         if (resets) {
           const diff = Math.round((resets * 1000 - Date.now()) / 60000);
-          msg += diff > 0 ? 'Try again in ~' + diff + ' minute' + (diff===1?'':'s') + '.' : 'Try again shortly.';
-        } else { msg += 'Try again in a few hours.'; }
+          if (diff > 1) msg = `Too many searches in a short period. Please wait about ${diff} minutes and try again.`;
+        }
         throw new Error(msg);
       }
       throw new Error(e.message || JSON.stringify(e));
@@ -931,25 +931,8 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
     errEl.textContent = `⚠ Error analyzing ${raw}: ${err.message}`;
   } finally {
     document.getElementById('loading').style.display = 'none';
-    startCooldown();
+    document.getElementById('search-btn').disabled = false;
   }
-}
-
-function startCooldown() {
-  const btn = document.getElementById('search-btn');
-  let secs = 65;
-  btn.disabled = true;
-  btn.textContent = `Wait ${secs}s`;
-  const interval = setInterval(() => {
-    secs--;
-    if (secs <= 0) {
-      clearInterval(interval);
-      btn.disabled = false;
-      btn.textContent = 'Analyze →';
-    } else {
-      btn.textContent = `Wait ${secs}s`;
-    }
-  }, 1000);
 }
 
 // ── Render results ─────────────────────────────────────────────
