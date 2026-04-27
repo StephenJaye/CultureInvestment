@@ -906,7 +906,7 @@ Respond ONLY with valid JSON, no preamble, no markdown fences. Format:
     const data = await response.json();
     if (data.error) {
       const e = data.error;
-      if (e.type === 'exceeded_limit' || JSON.stringify(e).includes('exceeded_limit')) {
+      if (e.type === 'rate_limit_error' || e.type === 'exceeded_limit' || (e.message && e.message.includes('rate limit'))) {
         const w5h = e.windows && e.windows['5h'];
         const resets = e.resetsAt || (w5h && w5h.resets_at);
         let msg = 'Too many searches in a short period. Please wait about a minute and try again.';
