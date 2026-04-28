@@ -47,8 +47,7 @@ export default async function handler(req, res) {
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'web-search-2025-03-05'
+      'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify(body)
   });
