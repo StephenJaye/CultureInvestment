@@ -1,1 +1,10 @@
 private/
+*.json
+*.rtf
+*.docx
+*.png
+*.docx
+.DS_Store
+~$*
+websearch_pricey_version.html
+people_score.html
