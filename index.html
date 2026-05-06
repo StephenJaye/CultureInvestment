@@ -1006,6 +1006,7 @@
     </div>
     <div class="user-bar-right">
       <button class="upgrade-btn" id="upgrade-bar-btn" onclick="openUpgradeModal()" style="display:none">Upgrade</button>
+      <button class="upgrade-btn" id="manage-plan-btn" onclick="openCustomerPortal()" style="display:none">Manage Plan</button>
       <button class="signout-btn" onclick="signOut()">Sign out</button>
     </div>
   </div>
@@ -1173,7 +1174,9 @@ async function refreshUserStatus() {
     }
 
     const upgradeBtn = document.getElementById('upgrade-bar-btn');
-    upgradeBtn.style.display = status.plan !== 'unlimited' ? 'block' : 'none';
+    const manageBtn = document.getElementById('manage-plan-btn');
+    upgradeBtn.style.display = status.plan === 'free' ? 'block' : 'none';
+    manageBtn.style.display = status.plan !== 'free' ? 'block' : 'none';
 
     // Update upgrade modal current plan highlight
     document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('current'));
@@ -1271,6 +1274,29 @@ function openUpgradeModal(sub) {
 
 function closeUpgradeModal() {
   document.getElementById('upgrade-modal').classList.remove('open');
+}
+
+async function openCustomerPortal() {
+  const btn = document.getElementById('manage-plan-btn');
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+  try {
+    const token = await getToken();
+    const res = await fetch('/api/customer-portal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert(data.error || 'Could not open billing portal. Please try again.');
+    }
+  } catch (e) {
+    alert('Could not open billing portal. Please try again.');
+  }
+  btn.textContent = 'Manage Plan';
+  btn.disabled = false;
 }
 
 async function startCheckout(tier) {
